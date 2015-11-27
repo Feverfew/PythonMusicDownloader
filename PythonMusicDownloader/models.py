@@ -56,6 +56,16 @@ class TrackDownloader(object):
             tracks.append(Track(track))
 
 
+    def get_download_url(self, track_id, reason="save"):
+        data = {
+            'access_token': self.token,
+            'track_id': track_id,
+            'reason': reason    
+        }
+        response = requests.post(self.API_TOKEN_URL, data=data)
+        return response
+
+
 class Track(object):
     """Holds data of a track"""
     def __init__(self, track):
