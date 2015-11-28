@@ -22,15 +22,22 @@ class TrackDownloader(object):
         self.query = query
         self.download_dir = download_dir
         self.token = self.get_access_token()
+        self.count = 0
         self.tracks = []
+
 
     def get_access_token(self):
         """Get access token from pleer.com"""
         auth = (self.id, self.key)
         data = {"grant_type": "client_credentials"}
-        response = requests.post(self.API_TOKEN_URL, auth=auth, data=data)
-        token = response.json().get("access_token")
+        response, token = None, None
+        try:
+            response = requests.post(self.API_TOKEN_URL, auth=auth, data=data)
+            token = response.json().get("access_token")
+        except:
+            return None # TODO Need to think of forcing creation of dialogue box in GUI
         return token
+
 
     def tracks_search(self, query, page=1, result_on_page=10, quality="all"):
         """Search for tracks
@@ -48,15 +55,52 @@ class TrackDownloader(object):
             'query': query,
             'page': page,
             'result_on_page': result_on_page,
-            'quality': quality    
+            'quality': quality
         }
-        response = requests.post(self.API_TOKEN_URL, data=data)
-        tracks = response.json().get("tracks")
-        for track in tracks:
-            tracks.append(Track(track))
+        try: 
+            response = requests.post(self.API_TOKEN_URL, data=data)
+            tracks = response.json().get("tracks")
+            self.count = response.json().get("count")
+            self.tracks = []
+            for track in tracks:
+                self.tracks.append(Track(track))
+        except:
+            pass
 
+
+    def tracks_get_info(self, track_id):
+        """Gets information and metadata of a track.
+        :param track_id: Id of track.
+        :type track_id: int
+        """
+        data = {
+            'access_token': self.token,
+            'track_id': track_id
+        }
+        response, track_info = None, None
+        try:
+            response  = requests.post(self.API_TOKEN_URL, data=data)
+        except:
+            response = None
+        if response:
+            track_info = {
+                'track_id': track_id,
+                'artist': response.json().get('artist'),
+                'track': response.json().get('track'),
+                'length': response.json().get('length'),
+                'bitrate': response.json().get('bitrate'),
+                'size': response.json().get('size')
+            }
+        return track_info
+            
 
     def get_download_url(self, track_id, reason="save"):
+        """Gets the download url of a file
+        :param track_id: Id of track.
+        :type track_id: int
+        :param reason: Reason for requesting url.
+        :type reason: str
+        """
         data = {
             'access_token': self.token,
             'track_id': track_id,
@@ -64,14 +108,38 @@ class TrackDownloader(object):
         }
         response = requests.post(self.API_TOKEN_URL, data=data)
         return response
-
+    
+    def get_top_list(self, list_type=1, page=1, language="en"):
+        """ Gets the most popular songs from pleer.com
+        :param list_type: Type of list.
+        :type list_type: int
+        :param page: Page of results.
+        :type page: int
+        :param language: Top list from what country (en, ru).
+        :type language: str
+        """
+        data = {
+            'access_token': self.token,
+            'list_type': list_type,
+            'page': page,
+            'language': language
+        }
+        try:
+            response = requests.post(self.API_TOKEN_URL, data=data)
+            tracks = response.json().get("tracks")
+            self.count = response.json().get("count")
+            self.tracks = []
+            for track in tracks:
+                self.tracks.append(Track(track))
+        except:
+            pass
 
 class Track(object):
     """Holds data of a track"""
     def __init__(self, track):
         """
         :param track: Metadata of track.
-        :type track: list.
+        :type track: dict.
         """
         self.id = track['track_id']
         self.artist = track['artist']
