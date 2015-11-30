@@ -24,19 +24,42 @@ class TrackDownloader(object):
         self.token = self.get_access_token()
         self.count = 0
         self.tracks = []
+        self.errors = None
+    
+    def _get_response(self, **kwargs):
+        data = kwargs['data']
+        self.errors, response = None, None
+        try:
+            response = requests.post(self.API_URL, data=data)
+        except requests.exceptions.ConnectionError as e:
+            self.errors = "Connection error: incorrect domain."
+        except requests.exceptions.ConnectTimeout as e:
+            self.errors = "Connection error: request timed out."
+        except requests.exceptions.ReadTimeout as e:
+            self.errors = "Error: Waited too long between bytes."
+        except ValueError:
+            self.errors = "Error: data received is not valid JSON."
+        return response
 
 
     def get_access_token(self):
         """Get access token from pleer.com"""
         auth = (self.id, self.key)
         data = {"grant_type": "client_credentials"}
-        response, token = None, None
+        token, self.errors = None, None
         try:
             response = requests.post(self.API_TOKEN_URL, auth=auth, data=data)
             token = response.json().get("access_token")
-        except:
-            return None # TODO Need to think of forcing creation of dialogue box in GUI
-        return token
+            return token
+        except requests.exceptions.ConnectionError as e:
+            self.errors = "Connection error: incorrect domain."
+        except requests.exceptions.ConnectTimeout as e:
+            self.errors = "Connection error: request timedout."
+        except requests.exceptions.ReadTimeout as e:
+            self.errors = "Error: Waited too long between bytes."
+        except ValueError:
+            self.errors = "Error: data received is not valid JSON."
+        return None
 
 
     def tracks_search(self, query, page=1, result_on_page=10, quality="all"):
@@ -52,20 +75,17 @@ class TrackDownloader(object):
         """
         data = {
             'access_token': self.token,
+            'method': 'tracks_search',
             'query': query,
             'page': page,
             'result_on_page': result_on_page,
             'quality': quality
         }
-        try: 
-            response = requests.post(self.API_TOKEN_URL, data=data)
-            tracks = response.json().get("tracks")
-            self.count = response.json().get("count")
-            self.tracks = []
-            for track in tracks:
-                self.tracks.append(Track(track))
-        except:
-            pass
+        response = self._get_response(data=data)
+        json_data = json.loads(response.text)
+        self.tracks = []
+        for track_id, track_info in json_data['tracks']['data'].items():
+            self.tracks.append(Track(track_info))
 
 
     def tracks_get_info(self, track_id):
@@ -75,11 +95,12 @@ class TrackDownloader(object):
         """
         data = {
             'access_token': self.token,
+            'method': 'tracks_get_info',
             'track_id': track_id
         }
         response, track_info = None, None
         try:
-            response  = requests.post(self.API_TOKEN_URL, data=data)
+            response  = requests.post(self.API_URL, data=data)
         except:
             response = None
         if response:
@@ -103,10 +124,11 @@ class TrackDownloader(object):
         """
         data = {
             'access_token': self.token,
+            'method': 'get_download_link',
             'track_id': track_id,
             'reason': reason    
         }
-        response = requests.post(self.API_TOKEN_URL, data=data)
+        response = requests.post(self.API_URL, data=data)
         return response
     
     def get_top_list(self, list_type=1, page=1, language="en"):
@@ -120,31 +142,43 @@ class TrackDownloader(object):
         """
         data = {
             'access_token': self.token,
+            'method': 'get_top_list',
             'list_type': list_type,
             'page': page,
             'language': language
         }
-        try:
-            response = requests.post(self.API_TOKEN_URL, data=data)
-            tracks = response.json().get("tracks")
-            self.count = response.json().get("count")
-            self.tracks = []
-            for track in tracks:
-                self.tracks.append(Track(track))
-        except:
-            pass
+        response = self._get_response(data=data)
+        json_data = json.loads(response.text)
+        self.tracks = []
+        for track_id, track_info in json_data['tracks']['data'].items():
+            self.tracks.append(Track(track_info))
 
 class Track(object):
     """Holds data of a track"""
     def __init__(self, track):
         """
         :param track: Metadata of track.
-        :type track: dict.
+        :type track: dict
         """
-        self.id = track['track_id']
+        self.id = track['id']
         self.artist = track['artist']
         self.track = track['track']
-        self.length = track['length']
+        # Pleer api spelt length incorrectly...
+        self.length = self.sec_to_min(int(track['lenght']))
         self.bitrate = track['bitrate']
-        self.size = track['size']
+
+    @staticmethod
+    def sec_to_min(seconds):
+        """Get a value in seconds and convert into minutes.
+        :param seconds: Length of song in seconds
+        :type seconds: int
+        """
+        second = seconds % 60
+        minutes = int(seconds/60)
+        if second == 0:
+            return "{}m".format(minutes)
+        elif minutes == 0:
+            return "{}s".format(second)
+        else:
+            return "{}m {}s".format(minutes, second)
 
