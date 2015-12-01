@@ -25,6 +25,7 @@ class TrackDownloader(object):
         self.count = 0
         self.tracks = []
         self.errors = None
+        self.page = 1
     
     def _get_response(self, **kwargs):
         data = kwargs['data']
@@ -46,7 +47,7 @@ class TrackDownloader(object):
         """Get access token from pleer.com"""
         auth = (self.id, self.key)
         data = {"grant_type": "client_credentials"}
-        token, self.errors = None, None
+        token = None
         try:
             response = requests.post(self.API_TOKEN_URL, auth=auth, data=data)
             token = response.json().get("access_token")
@@ -62,30 +63,31 @@ class TrackDownloader(object):
         return None
 
 
-    def tracks_search(self, query, page=1, result_on_page=10, quality="all"):
+    def tracks_search(self, result_on_page=10, quality="all"):
         """Search for tracks
         :param query: Query of user.
         :type query: str
         :param page: Selected page.
         :type page: int
-        :param result_on_page: Amount of results on a page.
-        :type result_on_page: int
         :param quality: Quality of file desired.
         :type quality: str
         """
         data = {
             'access_token': self.token,
             'method': 'tracks_search',
-            'query': query,
-            'page': page,
+            'query': self.query,
+            'page': self.page,
             'result_on_page': result_on_page,
             'quality': quality
         }
         response = self._get_response(data=data)
         json_data = json.loads(response.text)
         self.tracks = []
-        for track_id, track_info in json_data['tracks']['data'].items():
-            self.tracks.append(Track(track_info))
+        if json_data['count'] != '0' and json_data ['tracks'] != []:
+            for track_id, track_info in json_data['tracks'].items():
+                self.tracks.append(Track(track_info))
+        else:
+            self.errors = "No tracks were found that met your criteria."
 
 
     def tracks_get_info(self, track_id):
@@ -131,7 +133,7 @@ class TrackDownloader(object):
         response = requests.post(self.API_URL, data=data)
         return response
     
-    def get_top_list(self, list_type=1, page=1, language="en"):
+    def get_top_list(self, list_type=1, language="en"):
         """ Gets the most popular songs from pleer.com
         :param list_type: Type of list.
         :type list_type: int
@@ -144,7 +146,7 @@ class TrackDownloader(object):
             'access_token': self.token,
             'method': 'get_top_list',
             'list_type': list_type,
-            'page': page,
+            'page': self.page,
             'language': language
         }
         response = self._get_response(data=data)
