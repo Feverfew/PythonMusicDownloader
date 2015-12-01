@@ -26,6 +26,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.next_page_btn.clicked.connect(self.next_page)
         self.prev_page_btn.clicked.connect(self.previous_page)
         self.skip_to_btn.clicked.connect(self.skip_to_page)
+        self.download_dir_btn.clicked.connect(self.find_download_dir)
 
 
     def show_track_data(self):
@@ -83,6 +84,13 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         msgBox.setWindowTitle("Error")
         msgBox.setText(error)
         msgBox.exec_()
+
+    def find_download_dir(self):
+        """Let the user choose his desired download directory."""
+        dir_chooser = QtGui.QFileDialog()
+        dir_chooser.setFileMode(QtGui.QFileDialog.Directory)
+        dir_chooser.setOption(QtGui.QFileDialog.ShowDirsOnly)
+        dir_chooser.exec_()
 
     def next_page(self):
         """Go to next page of search criteria"""

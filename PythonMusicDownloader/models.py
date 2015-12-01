@@ -182,5 +182,7 @@ class Track(object):
         elif minutes == 0:
             return "{}s".format(second)
         else:
+            if second < 10:
+                second = "0" + str(second)
             return "{}m {}s".format(minutes, second)
 
