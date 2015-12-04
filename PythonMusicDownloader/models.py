@@ -26,6 +26,7 @@ class TrackDownloader(object):
         self.tracks = []
         self.errors = None
         self.page = 1
+        self.suggestions = None
     
     def _get_response(self, **kwargs):
         data = kwargs['data']
@@ -63,7 +64,7 @@ class TrackDownloader(object):
         return None
 
 
-    def tracks_search(self, result_on_page=10, quality="all"):
+    def tracks_search(self, result_on_page=20, quality="all"):
         """Search for tracks
         :param query: Query of user.
         :type query: str
@@ -154,6 +155,22 @@ class TrackDownloader(object):
         self.tracks = []
         for track_id, track_info in json_data['tracks']['data'].items():
             self.tracks.append(Track(track_info))
+
+
+    def get_suggest(self, part):
+        """Gets suggestions based on what user has typed
+        :param part: What the user has typed already.
+        :type part: str
+        """
+        data= {
+            'access_token': self.token,
+            'method': 'get_suggest',
+            'part': part
+        }
+        response = self._get_response(data=data)
+        json_data = json.loads(response.text)
+        self.suggestions = json_data['suggest']
+
 
 class Track(object):
     """Holds data of a track"""

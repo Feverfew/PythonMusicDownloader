@@ -19,14 +19,28 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.setupUi(self)
         # Make Table contents fit size of window.
         self.results_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.results_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         self.trackdownloader = models.TrackDownloader("313666", "Eb0iVMUcPeym8f8JEKWG")
-        self.show_track_data()
+
+        # Event Handlers
         self.search_btn.clicked.connect(self.search_tracks)
         self.next_page_btn.clicked.connect(self.next_page)
         self.prev_page_btn.clicked.connect(self.previous_page)
         self.skip_to_btn.clicked.connect(self.skip_to_page)
         self.download_dir_btn.clicked.connect(self.find_download_dir)
+        #self.artist_field.keyPressEvent(self.update_artist_suggestions())
+        #self.track_field.keyPressEvent(self.update_track_suggestions())
+
+        #Autocomplete
+        #self.artist_completer = QtGui.QCompleter()
+        #self.artist_field.setCompleter(self.artist_completer)
+        #self.track_completer = QtGui.QCompleter()
+        #self.track_field.setCompleter(self.track_completer)
+        #self.track_suggestions = QtGui.QStringListModel()
+        #self.artist_suggestions = QtGui.QStringListModel()
+        #self.artist_completer.setModel(self.trackdownloader.suggestions)
+        #self.track_completer.setModel(self.trackdownloader.suggestions)
 
 
     def show_track_data(self):
@@ -48,6 +62,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.results_table.setItem(i, 1, title)
             self.results_table.setItem(i, 2, length)
             self.results_table.setItem(i, 3, bitrate)
+            i += 1
         # Show page of results on line edit.
         self.skip_to_field.setText(str(self.trackdownloader.page))
 
@@ -87,10 +102,8 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
 
     def find_download_dir(self):
         """Let the user choose his desired download directory."""
-        dir_chooser = QtGui.QFileDialog()
-        dir_chooser.setFileMode(QtGui.QFileDialog.Directory)
-        dir_chooser.setOption(QtGui.QFileDialog.ShowDirsOnly)
-        dir_chooser.exec_()
+        self.trackdownloader.download_dir = QtGui.QFileDialog().getExistingDirectory()
+        self.download_dir_field.setText(self.trackdownloader.download_dir)
 
     def next_page(self):
         """Go to next page of search criteria"""
@@ -135,3 +148,11 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             else:
                 return True
 
+
+    def update_track_suggestions(self):
+        # TODO Artist field autocomplete.
+        pass
+
+    def update_artist_suggestions(self):
+        # TODO Artist field autocomplete.
+        pass
