@@ -131,6 +131,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.trackdownloader.errors = "Error: Cannot go to page 0"
             self.show_errors()
         else:
+            # TODO Add exception.
             self.trackdownloader.page = int(self.skip_to_field.text())
             self.search_tracks()
 
@@ -167,10 +168,14 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         """Downloads the selected track."""
         if self.download_dir_field.text() != "":
             row = self.results_table.currentRow()
-            id = self.results_table.item(row, 4).text()
-            artist = self.results_table.item(row, 0).text()
-            track = self.results_table.item(row, 1).text()
-            self.trackdownloader.download_track(id, artist, track)
+            if row != -1:
+                id = self.results_table.item(row, 4).text()
+                artist = self.results_table.item(row, 0).text()
+                track = self.results_table.item(row, 1).text()
+                self.trackdownloader.download_track(id, artist, track)
+            else:
+                self.trackdownloader.errors = "Error: Please select a song to download."
+                self.show_errors()
         else:
             self.trackdownloader.errors = "Error: Please select a download directory."
             self.show_errors()
