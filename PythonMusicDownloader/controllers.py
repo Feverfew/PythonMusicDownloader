@@ -19,7 +19,9 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.setupUi(self)
         # Make Table contents fit size of window.
         self.results_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        # Selecting cell selects whole row
         self.results_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.results_table.hideColumn(4)
 
         self.trackdownloader = models.TrackDownloader("313666", "Eb0iVMUcPeym8f8JEKWG")
 
@@ -29,6 +31,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.prev_page_btn.clicked.connect(self.previous_page)
         self.skip_to_btn.clicked.connect(self.skip_to_page)
         self.download_dir_btn.clicked.connect(self.find_download_dir)
+        self.download_btn.clicked.connect(self.download_tracks)
         #self.artist_field.keyPressEvent(self.update_artist_suggestions())
         #self.track_field.keyPressEvent(self.update_track_suggestions())
 
@@ -57,11 +60,14 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             length.setText(track.length)
             bitrate = QtGui.QTableWidgetItem()
             bitrate.setText(track.bitrate)
+            id = QtGui.QTableWidgetItem()
+            id.setText(track.id)
             self.results_table.insertRow(i)
             self.results_table.setItem(i, 0, artist)
             self.results_table.setItem(i, 1, title)
             self.results_table.setItem(i, 2, length)
             self.results_table.setItem(i, 3, bitrate)
+            self.results_table.setItem(i, 4, id)
             i += 1
         # Show page of results on line edit.
         self.skip_to_field.setText(str(self.trackdownloader.page))
@@ -156,3 +162,15 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
     def update_artist_suggestions(self):
         # TODO Artist field autocomplete.
         pass
+
+    def download_tracks(self):
+        """Downloads the selected track."""
+        if self.download_dir_field.text() != "":
+            row = self.results_table.currentRow()
+            id = self.results_table.item(row, 4).text()
+            artist = self.results_table.item(row, 0).text()
+            track = self.results_table.item(row, 1).text()
+            self.trackdownloader.download_track(id, artist, track)
+        else:
+            self.trackdownloader.errors = "Error: Please select a download directory."
+            self.show_errors()

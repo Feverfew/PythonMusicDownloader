@@ -22,7 +22,6 @@ class TrackDownloader(object):
         self.query = query
         self.download_dir = download_dir
         self.token = self.get_access_token()
-        self.count = 0
         self.tracks = []
         self.errors = None
         self.page = 1
@@ -127,12 +126,13 @@ class TrackDownloader(object):
         """
         data = {
             'access_token': self.token,
-            'method': 'get_download_link',
+            'method': 'tracks_get_download_link',
             'track_id': track_id,
             'reason': reason    
         }
         response = requests.post(self.API_URL, data=data)
-        return response
+        json_data = json.loads(response.text)
+        return json_data['url']
     
     def get_top_list(self, list_type=1, language="en"):
         """ Gets the most popular songs from pleer.com
@@ -170,6 +170,24 @@ class TrackDownloader(object):
         response = self._get_response(data=data)
         json_data = json.loads(response.text)
         self.suggestions = json_data['suggest']
+
+    def download_track(self, id, artist, track):
+        """Downloads a track based on its id
+        :param id: id of the track.
+        :type id: str
+        :param artist: Artist of the track.
+        :type artist: str
+        :param track: Title of the track.
+        :type track: str
+        """
+        url = self.get_download_url(id)
+        if self.download_dir:
+            filename = "{}\{} - {}.mp3".format(self.download_dir, artist, track)
+            data = requests.get(url)
+            with open(filename, 'wb') as f:
+                f.write(data.content)
+        else:
+            self.errors = "Error: Please select a download directory."
 
 
 class Track(object):
