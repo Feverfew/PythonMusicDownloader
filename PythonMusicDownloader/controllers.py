@@ -22,8 +22,11 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         # Selecting cell selects whole row
         self.results_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.results_table.hideColumn(4)
+        self.results_table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
         self.trackdownloader = models.TrackDownloader("313666", "Eb0iVMUcPeym8f8JEKWG")
+
+        self.threads = []
 
         # Event Handlers
         self.search_btn.clicked.connect(self.search_tracks)
@@ -172,10 +175,23 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
                 id = self.results_table.item(row, 4).text()
                 artist = self.results_table.item(row, 0).text()
                 track = self.results_table.item(row, 1).text()
-                self.trackdownloader.download_track(id, artist, track)
+                self.threads.append(DownloadThread(self.trackdownloader, id, artist, track))
+                self.threads[-1].start()
             else:
                 self.trackdownloader.errors = "Error: Please select a song to download."
                 self.show_errors()
         else:
             self.trackdownloader.errors = "Error: Please select a download directory."
             self.show_errors()
+
+class DownloadThread(QtCore.QThread):
+
+    def __init__(self, trackdownloader, id=None, artist=None, track=None, parent=None):
+        super(DownloadThread, self).__init__(parent)
+        self.trackdownloader = trackdownloader
+        self.id = id
+        self.artist = artist
+        self.track = track
+    
+    def run(self):
+        self.trackdownloader.download_track(self.id, self.artist, self.track)
