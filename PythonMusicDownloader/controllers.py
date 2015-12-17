@@ -9,7 +9,20 @@ class MainWindowController(QtGui.QMainWindow, views.MainWindowView):
        super(MainWindowController, self).__init__()
        self.setupUi(self)
        self.setCentralWidget(TrackDownloaderController())
+       self.setWindowIcon(QtGui.QIcon("resources/icon.ico"))
+       self.actionAbout_Author.activated.connect(self.open_author_page)
+       self.actionAbout_Program.activated.connect(self.open_project_page)
+       self.actionReport_a_Bug.activated.connect(self.open_issue_page)
        self.show()
+
+    def open_author_page(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew"))
+
+    def open_project_page(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew/PythonMusicDownloader"))
+
+    def open_issue_page(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew/PythonMusicDownloader/issues"))
 
 
 class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
@@ -106,6 +119,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.trackdownloader.errors = None
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle("Error")
+        msgBox.setWindowIcon(QtGui.QIcon("resources/icon.ico"))
         msgBox.setText(error)
         msgBox.exec_()
 
@@ -135,7 +149,10 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.show_errors()
         else:
             # TODO Add exception.
-            self.trackdownloader.page = int(self.skip_to_field.text())
+            try: 
+                self.trackdownloader.page = int(float(self.skip_to_field.text()))
+            except ValueError:
+                self.trackdownloader.page = 1
             self.search_tracks()
 
     def is_new_search(self):
@@ -185,7 +202,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.show_errors()
 
 class DownloadThread(QtCore.QThread):
-
+    """Thread for downloading mp3 file."""
     def __init__(self, trackdownloader, id=None, artist=None, track=None, parent=None):
         super(DownloadThread, self).__init__(parent)
         self.trackdownloader = trackdownloader
