@@ -31,13 +31,11 @@ class TrackDownloader(object):
         data = kwargs['data']
         self.errors, response = None, None
         try:
-            response = requests.post(self.API_URL, data=data)
+            response = requests.post(self.API_URL, data=data, timeout=10.0)
         except requests.exceptions.ConnectionError as e:
-            self.errors = "Connection error: incorrect domain."
-        except requests.exceptions.ConnectTimeout as e:
-            self.errors = "Connection error: request timed out."
-        except requests.exceptions.ReadTimeout as e:
-            self.errors = "Error: Waited too long between bytes."
+            self.errors = "Connection error: No connect could be established to server."
+        except requests.exceptions.Timeout as e:
+            self.errors = "Connection error: request timedout."
         except ValueError:
             self.errors = "Error: data received is not valid JSON."
         return response
@@ -49,15 +47,13 @@ class TrackDownloader(object):
         data = {"grant_type": "client_credentials"}
         token = None
         try:
-            response = requests.post(self.API_TOKEN_URL, auth=auth, data=data)
+            response = requests.post(self.API_TOKEN_URL, auth=auth, data=data, timeout=10.0)
             token = response.json().get("access_token")
             return token
         except requests.exceptions.ConnectionError as e:
-            self.errors = "Connection error: incorrect domain."
-        except requests.exceptions.ConnectTimeout as e:
+            self.errors = "Connection error: No connect could be established to server."
+        except requests.exceptions.Timeout as e:
             self.errors = "Connection error: request timedout."
-        except requests.exceptions.ReadTimeout as e:
-            self.errors = "Error: Waited too long between bytes."
         except ValueError:
             self.errors = "Error: data received is not valid JSON."
         return None
@@ -80,14 +76,17 @@ class TrackDownloader(object):
             'result_on_page': result_on_page,
             'quality': quality
         }
-        response = self._get_response(data=data)
-        json_data = json.loads(response.text)
-        self.tracks = []
-        if json_data['count'] != '0' and json_data ['tracks'] != []:
-            for track_id, track_info in json_data['tracks'].items():
-                self.tracks.append(Track(track_info))
-        else:
-            self.errors = "No tracks were found that met your criteria."
+        try:
+            response = self._get_response(data=data)
+            json_data = json.loads(response.text)
+            self.tracks = []
+            if json_data['count'] != '0' and json_data ['tracks'] != []:
+                for track_id, track_info in json_data['tracks'].items():
+                    self.tracks.append(Track(track_info))
+            else:
+                self.errors = "No tracks were found that met your criteria."
+        except AttributeError as e:
+            pass
 
 
     def tracks_get_info(self, track_id):
