@@ -41,16 +41,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
-    <addaction name="actionSave_AS"/>
-    <addaction name="actionExit"/>
-   </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
@@ -62,10 +52,8 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionDocs"/>
-    <addaction name="actionTutorial"/>
+    <addaction name="actionReport_a_Bug"/>
    </widget>
-   <addaction name="menuFile"/>
    <addaction name="menuAbout"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -112,6 +100,11 @@
   <action name="actionTutorial">
    <property name="text">
     <string>Tutorial</string>
+   </property>
+  </action>
+  <action name="actionReport_a_Bug">
+   <property name="text">
+    <string>Report a Bug</string>
    </property>
   </action>
  </widget>

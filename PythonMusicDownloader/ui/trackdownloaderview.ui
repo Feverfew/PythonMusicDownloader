@@ -53,14 +53,23 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="quality_lbl">
          <property name="text">
-          <string>TextLabel</string>
+          <string>Quality</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="quality_combobox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="minimumContentsLength">
+          <number>0</number>
+         </property>
          <item>
           <property name="text">
            <string>All</string>
