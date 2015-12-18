@@ -9,7 +9,7 @@ class MainWindowController(QtGui.QMainWindow, views.MainWindowView):
        super(MainWindowController, self).__init__()
        self.setupUi(self)
        self.setCentralWidget(TrackDownloaderController())
-       self.setWindowIcon(QtGui.QIcon("resources/icon.ico"))
+       self.setWindowIcon(QtGui.QIcon("icon.ico"))
        self.actionAbout_Author.activated.connect(self.open_author_page)
        self.actionAbout_Program.activated.connect(self.open_project_page)
        self.actionReport_a_Bug.activated.connect(self.open_issue_page)
@@ -119,7 +119,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.trackdownloader.errors = None
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle("Error")
-        msgBox.setWindowIcon(QtGui.QIcon("resources/icon.ico"))
+        msgBox.setWindowIcon(QtGui.QIcon("icon.ico"))
         msgBox.setText(error)
         msgBox.exec_()
 
