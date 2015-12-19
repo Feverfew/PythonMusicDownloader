@@ -37,7 +37,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         self.results_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         # Selecting cell selects whole row
         self.results_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.results_table.hideColumn(4)
+        self.results_table.hideColumn(5)
         self.results_table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
         self.trackdownloader = models.TrackDownloader("313666", "Eb0iVMUcPeym8f8JEKWG")
@@ -81,12 +81,15 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             bitrate.setText(track.bitrate)
             identifier = QtGui.QTableWidgetItem()
             identifier.setText(track.id)
+            downloaded = QtGui.QTableWidgetItem()
+            downloaded.setText("No")
             self.results_table.insertRow(i)
             self.results_table.setItem(i, 0, artist)
             self.results_table.setItem(i, 1, title)
             self.results_table.setItem(i, 2, length)
             self.results_table.setItem(i, 3, bitrate)
-            self.results_table.setItem(i, 4, identifier)
+            self.results_table.setItem(i, 4, downloaded)
+            self.results_table.setItem(i, 5, identifier)
             i += 1
         # Show page of results on line edit.
         self.skip_to_field.setText(str(self.trackdownloader.page))

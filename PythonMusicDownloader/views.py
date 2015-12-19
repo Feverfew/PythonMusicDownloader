@@ -129,7 +129,7 @@ class TrackDownloaderView(object):
         self.results_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.results_table.setWordWrap(False)
         self.results_table.setObjectName("results_table")
-        self.results_table.setColumnCount(5)
+        self.results_table.setColumnCount(6)
         self.results_table.setRowCount(0)
         item = QtGui.QTableWidgetItem()
         self.results_table.setHorizontalHeaderItem(0, item)
@@ -141,6 +141,8 @@ class TrackDownloaderView(object):
         self.results_table.setHorizontalHeaderItem(3, item)
         item = QtGui.QTableWidgetItem()
         self.results_table.setHorizontalHeaderItem(4, item)
+        item = QtGui.QTableWidgetItem()
+        self.results_table.setHorizontalHeaderItem(5, item)
         self.horizontalLayout_4.addWidget(self.results_table)
         self.verticalLayout.addLayout(self.horizontalLayout_4)
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -217,13 +219,16 @@ class TrackDownloaderView(object):
         self.results_table.horizontalHeaderItem(1).setText(QtGui.QApplication.translate("Form", "Track", None, QtGui.QApplication.UnicodeUTF8))
         self.results_table.horizontalHeaderItem(2).setText(QtGui.QApplication.translate("Form", "Length", None, QtGui.QApplication.UnicodeUTF8))
         self.results_table.horizontalHeaderItem(3).setText(QtGui.QApplication.translate("Form", "Bitrate", None, QtGui.QApplication.UnicodeUTF8))
-        self.results_table.horizontalHeaderItem(4).setText(QtGui.QApplication.translate("Form", "Id", None, QtGui.QApplication.UnicodeUTF8))
+        self.results_table.horizontalHeaderItem(4).setText(QtGui.QApplication.translate("Form", "Downloaded", None, QtGui.QApplication.UnicodeUTF8))
+        self.results_table.horizontalHeaderItem(5).setText(QtGui.QApplication.translate("Form", "Id", None, QtGui.QApplication.UnicodeUTF8))
         self.skip_to_btn.setText(QtGui.QApplication.translate("Form", "Skip to Page", None, QtGui.QApplication.UnicodeUTF8))
         self.prev_page_btn.setText(QtGui.QApplication.translate("Form", "<", None, QtGui.QApplication.UnicodeUTF8))
         self.next_page_btn.setText(QtGui.QApplication.translate("Form", ">", None, QtGui.QApplication.UnicodeUTF8))
         self.download_dir_label.setText(QtGui.QApplication.translate("Form", "Download Directory: ", None, QtGui.QApplication.UnicodeUTF8))
         self.download_dir_btn.setText(QtGui.QApplication.translate("Form", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.download_btn.setText(QtGui.QApplication.translate("Form", "Download", None, QtGui.QApplication.UnicodeUTF8))
+
+
 
 
 
