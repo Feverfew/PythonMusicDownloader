@@ -6,22 +6,25 @@ import models
 class MainWindowController(QtGui.QMainWindow, views.MainWindowView):
     """Controller for the main window of the application"""
     def __init__(self):
-       super(MainWindowController, self).__init__()
-       self.setupUi(self)
-       self.setCentralWidget(TrackDownloaderController())
-       self.setWindowIcon(QtGui.QIcon("icon.ico"))
-       self.actionAbout_Author.activated.connect(self.open_author_page)
-       self.actionAbout_Program.activated.connect(self.open_project_page)
-       self.actionReport_a_Bug.activated.connect(self.open_issue_page)
-       self.show()
+        super(MainWindowController, self).__init__()
+        self.setupUi(self)
+        self.setCentralWidget(TrackDownloaderController())
+        self.setWindowIcon(QtGui.QIcon("icon.ico"))
+        self.actionAbout_Author.activated.connect(self.open_author_page)
+        self.actionAbout_Program.activated.connect(self.open_project_page)
+        self.actionReport_a_Bug.activated.connect(self.open_issue_page)
+        self.show()
 
     def open_author_page(self):
+        """Opens the author's page in the user's browser"""
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew"))
 
     def open_project_page(self):
+        """Opens the program's page in the user's browser"""
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew/PythonMusicDownloader"))
 
     def open_issue_page(self):
+        """Opens the issues page in the user's browser"""
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/Feverfew/PythonMusicDownloader/issues"))
 
 
@@ -76,14 +79,14 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             length.setText(track.length)
             bitrate = QtGui.QTableWidgetItem()
             bitrate.setText(track.bitrate)
-            id = QtGui.QTableWidgetItem()
-            id.setText(track.id)
+            identifier = QtGui.QTableWidgetItem()
+            identifier.setText(track.id)
             self.results_table.insertRow(i)
             self.results_table.setItem(i, 0, artist)
             self.results_table.setItem(i, 1, title)
             self.results_table.setItem(i, 2, length)
             self.results_table.setItem(i, 3, bitrate)
-            self.results_table.setItem(i, 4, id)
+            self.results_table.setItem(i, 4, identifier)
             i += 1
         # Show page of results on line edit.
         self.skip_to_field.setText(str(self.trackdownloader.page))
@@ -107,7 +110,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.trackdownloader.query = "track:{}".format(track_query)
             self.trackdownloader.tracks_search()
             self.show_track_data()
-        else: 
+        else:
             self.trackdownloader.errors = "Error: please enter a search term."
 
         if self.trackdownloader.errors:
@@ -117,11 +120,11 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         """If there are errors show them in a message box."""
         error = self.trackdownloader.errors
         self.trackdownloader.errors = None
-        msgBox = QtGui.QMessageBox()
-        msgBox.setWindowTitle("Error")
-        msgBox.setWindowIcon(QtGui.QIcon("icon.ico"))
-        msgBox.setText(error)
-        msgBox.exec_()
+        msg_box = QtGui.QMessageBox()
+        msg_box.setWindowTitle("Error")
+        msg_box.setWindowIcon(QtGui.QIcon("icon.ico"))
+        msg_box.setText(error)
+        msg_box.exec_()
 
     def find_download_dir(self):
         """Let the user choose his desired download directory."""
@@ -149,7 +152,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
             self.show_errors()
         else:
             # TODO Add exception.
-            try: 
+            try:
                 self.trackdownloader.page = int(float(self.skip_to_field.text()))
             except ValueError:
                 self.trackdownloader.page = 1
@@ -160,7 +163,7 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         artist_query = self.artist_field.text()
         track_query = self.track_field.text()
         if artist_query != "" and track_query != "":
-            if self.trackdownloader.query == "artist:{} track:{}".format(artist_query, track_query):#
+            if self.trackdownloader.query == "artist:{} track:{}".format(artist_query, track_query):
                 return False
             else:
                 return True
@@ -189,10 +192,10 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
         if self.download_dir_field.text() != "":
             row = self.results_table.currentRow()
             if row != -1:
-                id = self.results_table.item(row, 4).text()
+                identifier = self.results_table.item(row, 4).text()
                 artist = self.results_table.item(row, 0).text()
                 track = self.results_table.item(row, 1).text()
-                self.threads.append(DownloadThread(self.trackdownloader, id, artist, track))
+                self.threads.append(DownloadThread(self.trackdownloader, identifier, artist, track))
                 self.threads[-1].start()
             else:
                 self.trackdownloader.errors = "Error: Please select a song to download."
@@ -203,12 +206,13 @@ class TrackDownloaderController(QtGui.QWidget, views.TrackDownloaderView):
 
 class DownloadThread(QtCore.QThread):
     """Thread for downloading mp3 file."""
-    def __init__(self, trackdownloader, id=None, artist=None, track=None, parent=None):
+    def __init__(self, trackdownloader, identifier=None, artist=None, track=None, parent=None):
         super(DownloadThread, self).__init__(parent)
         self.trackdownloader = trackdownloader
-        self.id = id
+        self.identifier = identifier
         self.artist = artist
         self.track = track
-    
+
     def run(self):
-        self.trackdownloader.download_track(self.id, self.artist, self.track)
+        """Starting this thread downloads the track"""
+        self.trackdownloader.download_track(self.identifier, self.artist, self.track)

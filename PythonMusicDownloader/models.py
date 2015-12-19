@@ -4,10 +4,10 @@ import json
 
 class TrackDownloader(object):
     """Downloads songs from pleer.com"""
-    def __init__(self, id, key, query=None, download_dir=None):
+    def __init__(self, identifier, key, query=None, download_dir=None):
         """
-        :param id: Id of Pleer API access.
-        :type id: int
+        :param identifier: Id of Pleer API access.
+        :type identifier: int
         :param key: key of Pleer API Access.
         :type key: str
         :param query: Query of user.
@@ -15,9 +15,9 @@ class TrackDownloader(object):
         :param download_dir: Download directory.
         :type download_dir: str
         """
-        self.API_TOKEN_URL = "http://api.pleer.com/token.php"
-        self.API_URL = "http://api.pleer.com/index.php"
-        self.id = id
+        self._API_TOKEN_URL = "http://api.pleer.com/token.php"
+        self._API_URL = "http://api.pleer.com/index.php"
+        self.identifier = identifier
         self.key = key
         self.query = query
         self.download_dir = download_dir
@@ -26,15 +26,19 @@ class TrackDownloader(object):
         self.errors = None
         self.page = 1
         self.suggestions = None
-    
+
     def _get_response(self, **kwargs):
+        """Using the token get a response depending no the data given.
+        :param kwargs['data']: dictionary of the data.
+        :type kwargs['data']: dict
+        """
         data = kwargs['data']
         self.errors, response = None, None
         try:
-            response = requests.post(self.API_URL, data=data, timeout=10.0)
-        except requests.exceptions.ConnectionError as e:
+            response = requests.post(self._API_URL, data=data, timeout=10.0)
+        except requests.exceptions.ConnectionError:
             self.errors = "Connection error: No connect could be established to server."
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             self.errors = "Connection error: request timedout."
         except ValueError:
             self.errors = "Error: data received is not valid JSON."
@@ -43,11 +47,11 @@ class TrackDownloader(object):
 
     def get_access_token(self):
         """Get access token from pleer.com"""
-        auth = (self.id, self.key)
+        auth = (self.identifier, self.key)
         data = {"grant_type": "client_credentials"}
         token = None
         try:
-            response = requests.post(self.API_TOKEN_URL, auth=auth, data=data, timeout=10.0)
+            response = requests.post(self._API_TOKEN_URL, auth=auth, data=data, timeout=10.0)
             token = response.json().get("access_token")
             return token
         except requests.exceptions.ConnectionError as e:
@@ -101,7 +105,7 @@ class TrackDownloader(object):
         }
         response, track_info = None, None
         try:
-            response  = requests.post(self.API_URL, data=data)
+            response  = requests.post(self._API_URL, data=data)
         except:
             response = None
         if response:
@@ -129,7 +133,7 @@ class TrackDownloader(object):
             'track_id': track_id,
             'reason': reason    
         }
-        response = requests.post(self.API_URL, data=data)
+        response = requests.post(self._API_URL, data=data)
         json_data = json.loads(response.text)
         return json_data['url']
     

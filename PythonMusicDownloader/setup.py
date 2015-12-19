@@ -5,7 +5,7 @@ exe=Executable(
      base="Win32Gui",
      icon="icon.ico"
      )
-includefiles=["controllers.py","models.py","views.py", "icon.ico"]
+includefiles=["controllers.py","models.py","views.py","icon.ico"]
 includes=[]
 excludes=[]
 packages=["requests", "atexit", "Pyside"]
